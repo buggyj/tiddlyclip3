@@ -1,6 +1,5 @@
 importScripts(
 './util/logsimple.js',
-'./dompurify/purify.min.js',
 './app/pref.js',
 './app/defaults.js',
 './app/tcBrowserchrome.js',

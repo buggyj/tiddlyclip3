@@ -22,6 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	//try {
 			var pasteText ;
 			var results = [], waitImage = false;
+			results.push({fn:"setHtml", val:DOMPurify.sanitize(request.html)});
 			console.log("+++++++++enter paste+++++");
 			pasteText = document.querySelector("#output");
 			pasteText.addEventListener('paste', function paste (e) {
@@ -34,8 +35,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					if (item.type.indexOf("image") !== 0)
 					{
 						console.log("pasting clip image no image");
-						if (e.clipboardData.types.indexOf('text/html') > -1)
-							results.push({fn:"setClipboardHtml",val:e.clipboardData.getData('text/html')});
+						if (e.clipboardData.types.indexOf('text/html') > -1){
+							var data = e.clipboardData.getData('text/html');
+							var val = DOMPurify.sanitize(data); console.log(data,"==",val);
+							results.push({fn:"setClipboardHtml", val:val});
+						}
 						if (e.clipboardData.types.indexOf('text/plain') > -1)
 							results.push({fn:"setClipboardString",val:e.clipboardData.getData('text/plain')});						
 					}

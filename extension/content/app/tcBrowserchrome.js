@@ -8,7 +8,7 @@ tiddlycut.modules.tcBrowser= (function () {
 		getPageTitle:getPageTitle, 			getPageRef:getPageRef, 					snap:snap,
 		getImageURL:getImageURL,			getLargestImgURL:getLargestImgURL,		winWrapper:winWrapper,
 	    log:log,							htmlEncode:htmlEncode,					onImage:onImage,
-	    onLink:onLink,						setSnapImage:setSnapImage,			
+	    onLink:onLink,						setSnapImage:setSnapImage,			setHtml:setHtml,
 	    getSelectedAsHtml:getSelectedAsHtml,createDiv:createDiv,				getSnapImage:getSnapImage,
 	    setDatafromCS:setDatafromCS,		UserInputDialog:UserInputDialog,	setDataFromBrowser:setDataFromBrowser,
 		getlinkURL:getlinkURL,				onLinkLocal:onLinkLocal,			onLinkRemote:onLinkRemote,
@@ -93,13 +93,13 @@ tiddlycut.modules.tcBrowser= (function () {
 }
 
 
-	 async function setFromClipboard(callback) {
+	 async function setFromClipboard(html, callback) {
 		var results = [];
 		
 		setClipboardString("");
 		setCBImage("");
 		setClipboardHtml("");	
-		results =   chrome.runtime.sendMessage({action: "ClipBoardRead"}, callback);	
+		results =   chrome.runtime.sendMessage({action: "ClipBoardRead", html:html}, callback);	
 		
 	}	
 		
@@ -117,8 +117,7 @@ tiddlycut.modules.tcBrowser= (function () {
 		onLink = (!!linkUrl);
 		selectionText=info.selectionText;
 	};	
-	function setDatafromCS( aurl, ahtml, atitle, atwc, atw5, ausrstring) {
-		html = ahtml;
+	function setDatafromCS( aurl, atitle, atwc, atw5, ausrstring) {
 		title =atitle;
 		url = aurl;
 		twc = atwc; 
@@ -286,8 +285,13 @@ tiddlycut.modules.tcBrowser= (function () {
 	{
 		return(param.replace(/&/mg,"&amp;").replace(/</mg,"&lt;").replace(/>/mg,"&gt;").replace(/\"/mg,"&quot;"));
 	}
+	function setHtml(str){
+		html = str;
+    }	
+	
+	
 	function getSelectedAsHtml(clean){
-				return  clean?DOMPurify.sanitize(html):html; //the getting of html is done by the content script asynchronously BUT sanitizing should be done here
+				return  html; //the getting of html is done by the content script asynchronously BUT sanitizing should be done here
 	}
 	
 	function  UserInputDialog(prompt, response) {

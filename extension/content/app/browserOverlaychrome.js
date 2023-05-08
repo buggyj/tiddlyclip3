@@ -356,10 +356,12 @@ tiddlycut.modules.browserOverlay = (function ()
 							action : 'cut', prompt:(promptindex?pref.Get(promptindex):null)
 						}, function (source)
 						{ 
-							tcBrowser.setDatafromCS( source.url, source.html, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later
-							tcBrowser.setFromClipboard(function (results) {
+							tcBrowser.setFromClipboard(source.html, function (results) {
 								var coords  = source.coords||{x0:null,y0:null,wdt:null,ht:null};
 								for (var i = 0; i < results.length; i++) tcBrowser[results[i].fn](results[i].val);
+								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later
+								
+								
 								tcBrowser.snap(size,tab.id, coords.x0, coords.y0, coords.wdt, coords.ht, function (dataURL) { 
 									chrome.tabs.sendMessage(tab.id, {action : 'restorescreen'}, 
 									function (source) { 
@@ -397,10 +399,11 @@ tiddlycut.modules.browserOverlay = (function ()
 				}, function (source)
 				{ 
 					tiddlycut.log ("currentCat",currentCat,"tab.id",tab.id);
-					tcBrowser.setDatafromCS( source.url, source.html, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
 					tcBrowser.setSnapImage("");
-					tcBrowser.setFromClipboard(function (results) {
-					for (var i = 0; i < results.length; i++){ tcBrowser[results[i].fn](results[i].val); console.log("from clpbd",results[i].fn)};
+					tcBrowser.setFromClipboard(source.html, function (results) {
+					for (var i = 0; i < results.length; i++){ console.log("from clpbd",results[i].fn); tcBrowser[results[i].fn](results[i].val)};
+					tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
+
 					chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
 						tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);				     
 						if (hasMode(modes,"note") ) {
