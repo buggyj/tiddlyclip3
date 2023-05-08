@@ -1,0 +1,49 @@
+{
+	"manifest_version": 3,
+	"web_accessible_resources": [
+	],
+
+	"background": { "service_worker": "content/loader.js" },
+	"content_scripts" : [ {
+		"js" : [
+			"content/util/logsimple.js"	,		
+			"content/contentScript.js"
+		],
+      "matches" : [
+        "http://*/*",
+        "file:///*",
+        "https://*/*"
+      ],
+		"run_at" : "document_start"
+	} ],
+	"description" : "clip web content to tiddlywiki",
+     "action": {
+      "default_icon": {
+         "48": "skin/clip48.png"
+      },
+      "default_popup": "popup.html"
+   },
+
+	"icons" : {
+		"16" : "skin/clip16.png",
+		"48" : "skin/clip48.png"
+	},
+    "options_ui": {
+    "page": "options.html"
+  },
+	"name" : "tiddlyclip3",
+	"permissions" : [
+		"storage" ,
+		"tabs", 
+		"contextMenus",
+		"notifications",
+		"scripting",
+		"clipboardRead",
+		"offscreen"
+	],
+"host_permissions": [
+  "<all_urls>"
+],
+
+	"version" : "0.0.1"
+}
