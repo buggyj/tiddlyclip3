@@ -19,7 +19,7 @@ tiddlycut.modules.tcBrowser= (function () {
 		setClipboardHtml:setClipboardHtml,	getClipboardHtml:getClipboardHtml,  setFromClipboard:setFromClipboard
 	}
 
-    var convert,defaults;
+    var convert;
     var _strings_bundle_default;
     var thechrome, browseris;
     
@@ -27,8 +27,7 @@ tiddlycut.modules.tcBrowser= (function () {
 	function onLoad(browser, doc) {
 		browseris 	= browser;
 		thechrome=doc;
-		defaults	= tiddlycut.modules.defaults;
-		console.log("browerstartup");
+		tiddlycut.log("browerstartup");
 		
 	const offscreenDocumentPath ="content/background.html";
 
@@ -70,12 +69,12 @@ tiddlycut.modules.tcBrowser= (function () {
 
     
 	function snap(size,sourcetab,xx0,yy0,wdt,ht,callback){ //async in chrome
-		console.log("enter snap")
+		tiddlycut.log("enter snap")
 		chrome.tabs.get(sourcetab, function(tab){
 			
 			chrome.tabs.getZoom( function (zoomed){
 				var h = ht*zoomed||tab.height, w = wdt*zoomed||tab.width, x0 = xx0*zoomed||0, y0 = yy0*zoomed||0;
-				console.log("enter getzoom ");
+				tiddlycut.log("enter getzoom ");
 				
 				chrome.tabs.captureVisibleTab(null, {format: 'png', quality: 100},  async function(dataURI) {
 					if (dataURI) {
@@ -175,11 +174,11 @@ tiddlycut.modules.tcBrowser= (function () {
 	{	
 		return clipBoardString||"";
 	}
-	function setClipboardHtml(text){ console.log ("setclipboardhtmt", text);
+	function setClipboardHtml(text){
 		clipBoardHtml=text;
 	}		
 	function getClipboardHtml()
-	{	console.log("getclpboardjtml",clipBoardHtml||"");
+	{	
 		return clipBoardHtml||"";
 	}
 	function getPageTitle() {

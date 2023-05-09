@@ -76,9 +76,7 @@
 			locale = locale.join('/');
 		var styles=false;
 		var safety=false;
-		/*  The parser does not appear to work in content script - maybe move parsing here and only pass the 'keep styles to content script'
-		    if (tClip.hasMode(tClip.getCategories()[category],"keepstyle") ) styles = true;
-		    */
+
 		if (tClip.hasMode(modes,"dirty") ) safety = false;
 		api.data.web  = tcBrowser.getSelectedAsHtml(safety);
 

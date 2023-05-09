@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			ctx.scale(request.size, request.size);															
 			var image = new Image();
 			image.onload = function() {
-				console.log("++++++++drawimage++++++++++", request.h,request.w,request.x0,request.y0);
+				//console.log("++++++++drawimage++++++++++", request.h,request.w,request.x0,request.y0);
 				ctx.drawImage(image,request.x0,request.y0,request.w,request.h,0, 0, request.w, request.h);
 				//Create a data url from the canvas
 				var data = thumbnail.toDataURL("image/png");
@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			};
 
 			image.src = request.image;
-	console.log("++++++++++++++++++");
+	
 	//sendResponse(request.image);
     return true;
   } else   if (request.action == 'ClipBoardRead') { 
@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			var pasteText ;
 			var results = [], waitImage = false;
 			results.push({fn:"setHtml", val:DOMPurify.sanitize(request.html)});
-			console.log("+++++++++enter paste+++++");
+			//console.log("+++++++++enter paste+++++");
 			pasteText = document.querySelector("#output");
 			pasteText.addEventListener('paste', function paste (e) {
 				//e.preventDefault();
@@ -64,10 +64,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	
 				if (waitImage === false) sendResponse(results);
 			});
-			console.log("+++++++before paste+++++++++++");
+			//console.log("+++++++before paste+++++++++++");
 			pasteText.select();
 			document.execCommand("paste");
-			console.log("+++++++after paste+++++++++++");
+			//console.log("+++++++after paste+++++++++++");
 		//} catch (e) {console.log(e);}
 		return true;
   }

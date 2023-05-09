@@ -1,12 +1,10 @@
 tiddlycut.modules.tClip = (function () {
 	
-    if(typeof tiddlycut.globaldock === 'undefined') var onemenu = false;
-	else var onemenu = tiddlycut.globaldock;
+
 	
 	var api = 
 	{
-		onLoad:onLoad,				getSectionNames:getSectionNames,
-		getCategories:getCategories,			
+		onLoad:onLoad,				getSectionNames:getSectionNames,	
 		hasMode:hasMode,			loadSectionFromFile:loadSectionFromFile, 	
 		setClipConfig:setClipConfig,	
 		getModeBegining:getModeBegining,
@@ -21,14 +19,13 @@ tiddlycut.modules.tClip = (function () {
 		tcBrowser	= tiddlycut.modules.tcBrowser;
 		defaults	= tiddlycut.modules.defaults;
 	}
-	
-	var activeCategories= onemenu?one.activeCategories:{};
-	var sectionNames=onemenu?one.sectionNames:[];
+
+	var sectionNames=[];
     
     var ClipConfig;
     
  	//overrides are for global contextmenu
-	var self = onemenu?one.self:{
+	var self = {
 		ClipConfig:ClipConfig
 	}
 //////////public section/////////////////////
@@ -55,9 +52,9 @@ tiddlycut.modules.tClip = (function () {
 			if (hasModeBegining(cat,"debug")) {
 				debugcontrol(cat);
 			} else {
-				activeCategories[catName] = cat;
-				setSubMenu(cat,catName,sectionName,id);
+				setSubMenu(cat,catName,sectionName,id);	
 			}
+			pref.addTags();
 		} 
 		return;
 	}
@@ -115,19 +112,14 @@ tiddlycut.modules.tClip = (function () {
 		}
 	}
 		
-	function getCategories()	{   
-		return activeCategories;
-	}	
+
 	function getSectionNames()	{ 
 		return sectionNames;
 	}
 
 	function loadSectionFromFile(id) {
-		activeCategories= {};
         sectionNames=['Default'];
         var sectionStrgs, catIsNotSet = true;
-
-		//if (activeSection===0) defaultCategories();//load default rules defined by this program 
 
 		var content = self.ClipConfig;//where all sections are defined
 		if (content) {

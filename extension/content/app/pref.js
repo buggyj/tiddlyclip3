@@ -50,16 +50,75 @@ tiddlycut.modules.pref = (function ()
 					}
 				}
 			});
-		 };
+		 },
 		 
-
+		// Parse a string array from a bracketted list. For example "OneTiddler [[Another Tiddler]] LastOne"
+	 parseStringArray = function(value) {
+			if(typeof value === "string") {
+				var memberRegExp = /(?:^|[^\S\xA0])(?:\[\[(.*?)\]\])(?=[^\S\xA0]|$)|([\S\xA0]+)/mg,
+					results = [],
+					match;
+				do {
+					match = memberRegExp.exec(value);
+					if(match) {
+						var item = match[1] || match[2];
+						if(item !== undefined && results.indexOf(item) === -1) {
+							results.push(item);
+						}
+					}
+				} while(match);
+				return results;
+			} else {
+				return null;
+			}
+		},
+		
+		createTagsFlags = function (fromTableTags) {
+			var tags = null,flag = null,flaglist = {}, taglist = {};
+			tags=pref.Get("tags");
+			if (tags) {
+				tags = tags.split(/\s*,\s*/);
+				for (var nn = 0; nn < tags.length; nn++) {
+					if (!!fromTableTags[tags[nn]]) taglist[tags[nn]] = true;
+					else taglist[tags[nn]] = false;
+				}				
+			}
+			flags=pref.Get("flags");
+			if (flags) {
+				flags = flags.split(/\s*,\s*/);
+				for (var nn = 0; nn < flags.length; nn++) {
+					flaglist[flags[nn]] = false;
+				}				
+			}		
+			//resettags = taglist; //for resetting after aclip to empty boxes in the popup	
+			//resetflags =flaglist
+			console.log("tags", tags)
+			chrome.storage.local.set({'tags': taglist,'flags': flaglist}, function() {console.log("bg: set from taglist")});
+			chrome.storage.local.set({'resettags': taglist,'resetflags': flaglist}, function() {console.log("bg: set from taglist")});
+		}
+		
+		addTags = function (tags) {
+			var taglist = {};
+			if (tags) {
+				tags = parseStringArray(tags);
+				
+				for (var nn = 0; nn < tags.length; nn++) {
+					taglist[tags[nn]] = true;
+				}				
+			}
+			createTagsFlags(taglist);
+		}
 	var defaults,  browseris, ClipConfig = [], ClipOpts = [];
+	
+	
+	
 	
 	var api = 
 	{
 		onLoad:onLoad,	 		
 		Get:Get,	 
 		Set:Set,
+		addTags:addTags,
 		loadOpts:loadOpts
 	}
 

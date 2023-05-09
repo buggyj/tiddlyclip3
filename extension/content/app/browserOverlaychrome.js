@@ -2,6 +2,9 @@ if (!tiddlycut)
 	var tiddlycut = {};
 if (!tiddlycut.modules)
 	tiddlycut.modules = {};
+	
+tiddlycut.log=console.log;	
+	
 function changedtab (tabId,changeInfo) {
 	if (tabId !==tiddlycut.id) return;
 	 chrome.contextMenus.removeAll(function() {		
@@ -13,13 +16,13 @@ function changedtab (tabId,changeInfo) {
 				}
 			);
 		});
-	console.log(tabId, "tab has closed or reloaded")
+	tiddlycut.log(tabId, "tab has closed or reloaded")
 };
 chrome.tabs.onRemoved.addListener(changedtab);
 chrome.tabs.onUpdated.addListener(changedtab);
 
 tiddlycut.id = null;
-	tiddlycut.log=console.log;
+	
 console.log ("starting");	
 chrome.runtime.onInstalled.addListener(function(details){console.log ("oninstall "+details.reason)
     if(details.reason == "install" ||details.reason == "update"){ 
@@ -27,7 +30,7 @@ chrome.runtime.onInstalled.addListener(function(details){console.log ("oninstall
     for (var i = 0; i < windows.length; i++) {
       var tabs = windows[i].tabs;
       for (var j = 0; j < tabs.length; j++) {
-            console.log ("loadcs "+j);
+            tiddlycut.log ("loadcs "+j);
             var urlparts = tabs[j].url.split('://');
             if (urlparts.length > 1 && urlparts[0] === "chrome") break;
             try { 
@@ -89,7 +92,7 @@ tiddlycut.modules.browserOverlay = (function ()
 		} 
 
 		function dock(info, tab) {
-			console.log("item dock " + info.menuItemId + " was clicked " +tab.id);
+			tiddlycut.log("item dock " + info.menuItemId + " was clicked " +tab.id);
 			chrome.tabs.sendMessage(tab.id, 
 			{
 				action : 'actiondock', data:{opttid:pref.Get("ConfigOptsTiddler")}
@@ -119,7 +122,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			api.adaptions[method]();
 		}
 		
-    chrome.storage.local.set({'tags': {},'flags': {}}, function() {console.log("bg: reset taglist")});
+    chrome.storage.local.set({'tags': {},'flags': {}}, function() {tiddlycut.log("bg: reset taglist")});
 	}
 	
 	function hasMode (modes,mode) {
@@ -141,10 +144,10 @@ tiddlycut.modules.browserOverlay = (function ()
 			if (mode === modes[i].substr(0,mode.length)) return modes[i];
 	}
 	chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
-		console.log("tiddlyclipbg: got request: "+msg.action);
+		tiddlycut.log("tiddlyclipbg: got request: "+msg.action);
 		if (msg.action == "dock") {
 			dockRegister(sender.tab.id, msg.url, msg.txt, msg.extra, msg.aux, true );//redock true
-			console.log ("got dock")
+			tiddlycut.log ("got dock")
 		}
 		else if (msg.action == "notify") {
 			chrome.notifications.create({
@@ -153,10 +156,10 @@ tiddlycut.modules.browserOverlay = (function ()
 				  "message": msg.aux,
 				  "iconUrl":"../skin/clip48.png"
 			});
-			console.log ("got notify"+msg.txt+"-"+msg.aux);
+			tiddlycut.log ("got notify"+msg.txt+"-"+msg.aux);
 		}else if (msg.action == "bgbeep") {
 			new Audio(chrome.extension.getURL('beep.mp3')).play();
-			console.log ("got bgbeep");
+			tiddlycut.log ("got bgbeep");
 		}
 		else {
 			chrome.tabs.query({
@@ -247,6 +250,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			tiddlycut.log("--config-- null");
 			return;
 		}
+		pref.loadOpts(opts);
 
 	    changeFileNew(configtid.body, id);	    
 
@@ -289,7 +293,7 @@ tiddlycut.modules.browserOverlay = (function ()
 		});	
 	}
 	
-	function pushData(category, info, tab, id, section, modes) //chrome only
+	function pushData(category, info, tab, id, section, modes) 
 	{
 		var promptindex;
 		tiddlycut.log(modes);
@@ -317,14 +321,14 @@ tiddlycut.modules.browserOverlay = (function ()
 		}
 		//-----cptext control------
 		if (hasModeBegining(modes,"cptext") ) {			
-			chrome.storage.local.set({'cptext': info.selectionText}, function() {console.log("bg: add cptext")});
+			chrome.storage.local.set({'cptext': info.selectionText}, function() {tiddlycut.log("bg: add cptext")});
 			return;
 		}
 		//-----text2note control------
 		if (hasModeBegining(modes,"text2note") ) {
 			chrome.storage.local.get("notepad", function(items){
                 var text = ((items.notepad!=null) && (items.notepad!=""))?items.notepad + "\n\n":"";
-				chrome.storage.local.set({'notepad': text + info.selectionText}, function() {console.log("bg: add text2note")});
+				chrome.storage.local.set({'notepad': text + info.selectionText}, function() {tiddlycut.log("bg: add text2note")});
 			})
 			return;
 		}
@@ -365,20 +369,22 @@ tiddlycut.modules.browserOverlay = (function ()
 								tcBrowser.snap(size,tab.id, coords.x0, coords.y0, coords.wdt, coords.ht, function (dataURL) { 
 									chrome.tabs.sendMessage(tab.id, {action : 'restorescreen'}, 
 									function (source) { 
-											tcBrowser.setSnapImage(dataURL);
-											chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
-												tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);
-												if (hasMode(modes,"note") ) {
-													chrome.storage.local.get("notepad", function(items){
-														tcBrowser.setNote(items.notepad);
-														GoChrome(currentCat, null, tab.id, id, section, modes);
-														chrome.storage.local.set({'notepad': ""}, function() {console.log("bg: rm note")});
-													});
-												} else {
+										tcBrowser.setSnapImage(dataURL);
+										chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
+											tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);
+											if (hasMode(modes,"note") ) {
+												chrome.storage.local.get("notepad", function(items){
+													tcBrowser.setNote(items.notepad);
 													GoChrome(currentCat, null, tab.id, id, section, modes);
-												}
-												chrome.storage.local.set({'tags': resettags,'flags': resetflags, cptext:null}, function() {console.log("bg: reset tags etc")});
-											})
+													chrome.storage.local.set({'notepad': ""}, function() {tiddlycut.log("bg: rm note")});
+												});
+											} else {
+												GoChrome(currentCat, null, tab.id, id, section, modes);
+											}
+											chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
+												chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
+											});
+										});
 									});
 								});
 							})
@@ -400,23 +406,27 @@ tiddlycut.modules.browserOverlay = (function ()
 				{ 
 					tiddlycut.log ("currentCat",currentCat,"tab.id",tab.id);
 					tcBrowser.setSnapImage("");
-					tcBrowser.setFromClipboard(source.html, function (results) {
-					for (var i = 0; i < results.length; i++){ console.log("from clpbd",results[i].fn); tcBrowser[results[i].fn](results[i].val)};
-					tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
 
-					chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
-						tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);				     
-						if (hasMode(modes,"note") ) {
-							chrome.storage.local.get("notepad", function(items){
-								tcBrowser.setNote(items.notepad);
+					tcBrowser.setFromClipboard(source.html, function (results) {
+						for (var i = 0; i < results.length; i++){ tcBrowser[results[i].fn](results[i].val)};
+						tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
+
+						chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
+							tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);				     
+							if (hasMode(modes,"note") ) {
+								chrome.storage.local.get("notepad", function(items){
+									tcBrowser.setNote(items.notepad);
+									GoChrome(currentCat, null, tab.id, id, section, modes);
+									chrome.storage.local.set({'notepad': null}, function() {tiddlycut.log("bg: rm note")});							
+								});
+							} else {
 								GoChrome(currentCat, null, tab.id, id, section, modes);
-								chrome.storage.local.set({'notepad': null}, function() {console.log("bg: rm note")});							
+							}
+							chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
+								chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
 							});
-						} else {
-							GoChrome(currentCat, null, tab.id, id, section, modes);
-						}
-					chrome.storage.local.set({'tags': resettags,'flags': resetflags, cptext:null}, function() {console.log("bg: reset tags etc")});
-					})});
+						});
+					});
 				}
 				
 			);
@@ -433,7 +443,7 @@ tiddlycut.modules.browserOverlay = (function ()
 						chrome.storage.local.get("notepad", function(items){
 							tcBrowser.setNote(items.notepad);
 							GoChrome(currentCat, source.tids, tab.id, id, section, modes);
-							chrome.storage.local.set({'notepad': null}, function() {console.log("bg: rm note")});
+							chrome.storage.local.set({'notepad': null}, function() {tiddlycut.log("bg: rm note")});
 						});
 					} else {
 						GoChrome(currentCat, source.tids, tab.id, id, section, modes);
