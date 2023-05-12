@@ -32,7 +32,6 @@ tiddlycut.modules.tClip = (function () {
 	function loadActiveSectionCategories(table, sectionName,id) {
 		var categoryRows = table.split("\n");
 		var cat = {};
-		var tagsAndModes;
 		var pieces;
 		setMenu(sectionName,id);
 		for (var i=0; i<categoryRows.length; i++) {

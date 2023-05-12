@@ -51,36 +51,14 @@ tiddlycut.modules.pref = (function ()
 				}
 			});
 		 },
-		 
-		// Parse a string array from a bracketted list. For example "OneTiddler [[Another Tiddler]] LastOne"
-	 parseStringArray = function(value) {
-			if(typeof value === "string") {
-				var memberRegExp = /(?:^|[^\S\xA0])(?:\[\[(.*?)\]\])(?=[^\S\xA0]|$)|([\S\xA0]+)/mg,
-					results = [],
-					match;
-				do {
-					match = memberRegExp.exec(value);
-					if(match) {
-						var item = match[1] || match[2];
-						if(item !== undefined && results.indexOf(item) === -1) {
-							results.push(item);
-						}
-					}
-				} while(match);
-				return results;
-			} else {
-				return null;
-			}
-		},
 		
-		createTagsFlags = function (fromTableTags) {
+		createTagsFlags = function () {
 			var tags = null,flag = null,flaglist = {}, taglist = {};
 			tags=pref.Get("tags");
 			if (tags) {
 				tags = tags.split(/\s*,\s*/);
 				for (var nn = 0; nn < tags.length; nn++) {
-					if (!!fromTableTags[tags[nn]]) taglist[tags[nn]] = true;
-					else taglist[tags[nn]] = false;
+					taglist[tags[nn]] = false;
 				}				
 			}
 			flags=pref.Get("flags");
@@ -97,16 +75,8 @@ tiddlycut.modules.pref = (function ()
 			chrome.storage.local.set({'resettags': taglist,'resetflags': flaglist}, function() {console.log("bg: set from taglist")});
 		}
 		
-		addTags = function (tags) {
-			var taglist = {};
-			if (tags) {
-				tags = parseStringArray(tags);
-				
-				for (var nn = 0; nn < tags.length; nn++) {
-					taglist[tags[nn]] = true;
-				}				
-			}
-			createTagsFlags(taglist);
+		addTags = function () {
+			createTagsFlags();
 		}
 	var defaults,  browseris, ClipConfig = [], ClipOpts = [];
 	

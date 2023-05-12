@@ -48,8 +48,6 @@
 		api.data.pageRef =  tcBrowser.getPageRef();  //replaces  %PageRef%
 		api.data.text = 	tcBrowser.getSelectedAsText()||"";
 		api.data.clip = 	tcBrowser.getClipboardString()||"";
-		//if (tClip.hasMode(modes,"dirty") ) api.data.cliphtml = tcBrowser.getClipboardHtml()||"";
-		//else api.data.cliphtml = DOMPurify.sanitize(tcBrowser.getClipboardHtml())||"";
 		api.data.cliphtml = tcBrowser.getClipboardHtml()||"";
 		api.data.imageURL=	unescape(tcBrowser.getImageURL());
 		api.data.largestImgURL=	unescape(tcBrowser.getLargestImgURL())||"";

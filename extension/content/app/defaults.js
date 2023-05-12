@@ -27,9 +27,6 @@
 	function getDefaultCategories() {
 		return defaultCategories;
 	}		
- 
-	function getDefaultRule(ruleName) {
-		return defaultRules[ruleName];
-	}
+
  	return api;
 }());

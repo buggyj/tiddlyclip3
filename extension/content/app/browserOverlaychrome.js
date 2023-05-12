@@ -187,24 +187,6 @@ tiddlycut.modules.browserOverlay = (function ()
             }
         }
     }
-
-	function setSelectModes(){
-		tcBrowser.setOnImage();
-		tcBrowser.setOnLink();
-		tcBrowser.setImageURL();		
-	}	
-
-	function currentSelectModes() {
-		var curModes = [];
-		if (tcBrowser.hasSelectedText())curModes.push(tClip.SELECTMODES.Text);
-		if (tcBrowser.hasCopiedText()) 	curModes.push(tClip.SELECTMODES.Clip);
-		if (tcBrowser.onImage()) 		curModes.push(tClip.SELECTMODES.Image);
-		if (tcBrowser.onLink())			curModes.push(tClip.SELECTMODES.Link);	
-		if (tcBrowser.isTiddlyWikiClassic()) curModes.push(tClip.SELECTMODES.TWC);	
-			//alert(curModes);
-		return 	curModes;
-	}
-
 	
 	function sendsysmsg  (tab, section, cat, data) {
 		var sdata = {data:data};
@@ -360,7 +342,7 @@ tiddlycut.modules.browserOverlay = (function ()
 							action : 'cut', prompt:(promptindex?pref.Get(promptindex):null)
 						}, function (source)
 						{ 
-							tcBrowser.setFromClipboard(source.html, function (results) {
+							tcBrowser.setFromClipboard(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
 								var coords  = source.coords||{x0:null,y0:null,wdt:null,ht:null};
 								for (var i = 0; i < results.length; i++) tcBrowser[results[i].fn](results[i].val);
 								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later
@@ -407,7 +389,7 @@ tiddlycut.modules.browserOverlay = (function ()
 					tiddlycut.log ("currentCat",currentCat,"tab.id",tab.id);
 					tcBrowser.setSnapImage("");
 
-					tcBrowser.setFromClipboard(source.html, function (results) {
+					tcBrowser.setFromClipboard(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
 						for (var i = 0; i < results.length; i++){ tcBrowser[results[i].fn](results[i].val)};
 						tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
 
