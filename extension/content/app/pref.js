@@ -70,7 +70,7 @@ tiddlycut.modules.pref = (function ()
 			}		
 			//resettags = taglist; //for resetting after aclip to empty boxes in the popup	
 			//resetflags =flaglist
-			console.log("tags", tags)
+			console.log("tags", tags);
 			chrome.storage.local.set({'tags': taglist,'flags': flaglist}, function() {console.log("bg: set from taglist")});
 			chrome.storage.local.set({'resettags': taglist,'resetflags': flaglist}, function() {console.log("bg: set from taglist")});
 		}

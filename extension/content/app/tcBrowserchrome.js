@@ -55,6 +55,7 @@ tiddlycut.modules.tcBrowser= (function () {
 					}
 				);
 			});
+			chrome.storage.local.set({'tags': {},'flags': {},'docklist':[]}, function() {tiddlycut.log("bg: reset tags etc")});
 		}).catch(error => console.log(error));
 	})(offscreenDocumentPath);
 

@@ -4,9 +4,9 @@ tiddlycut.modules.tClip = (function () {
 	
 	var api = 
 	{
-		onLoad:onLoad,				getSectionNames:getSectionNames,	
-		hasMode:hasMode,			loadSectionFromFile:loadSectionFromFile, 	
-		setClipConfig:setClipConfig,	
+		onLoad:onLoad,					
+		hasMode:hasMode,
+		loadSectionFromFile:loadSectionFromFile,	
 		getModeBegining:getModeBegining,
 		hasModeBegining:hasModeBegining	
 
@@ -22,13 +22,6 @@ tiddlycut.modules.tClip = (function () {
 
 	var sectionNames=[];
     
-    var ClipConfig;
-    
- 	//overrides are for global contextmenu
-	var self = {
-		ClipConfig:ClipConfig
-	}
-//////////public section/////////////////////
 	function loadActiveSectionCategories(table, sectionName,id) {
 		var categoryRows = table.split("\n");
 		var cat = {};
@@ -53,7 +46,7 @@ tiddlycut.modules.tClip = (function () {
 			} else {
 				setSubMenu(cat,catName,sectionName,id);	
 			}
-			pref.addTags();
+			
 		} 
 		return;
 	}
@@ -103,7 +96,7 @@ tiddlycut.modules.tClip = (function () {
 		for (var i=0; i< cat.modes.length;i++)
 			if (mode === cat.modes[i].substr(0,mode.length)) return cat.modes[i];
 	}
-//////////////////////////////////////		
+		
 	function defaultCategories() {
 		var defaultcats  =defaults.getDefaultCategories();
 		for (var i= 0; i< defaultcats.length; i++) {
@@ -112,15 +105,11 @@ tiddlycut.modules.tClip = (function () {
 	}
 		
 
-	function getSectionNames()	{ 
-		return sectionNames;
-	}
 
-	function loadSectionFromFile(id) {
+	function loadSectionFromFile(id, content) {
         sectionNames=['Default'];
         var sectionStrgs, catIsNotSet = true;
 
-		var content = self.ClipConfig;//where all sections are defined
 		if (content) {
 			sectionStrgs = content.split('\n!'); //sections begin with a title, eg !mysection, followed by a table of categories
 			//the ! has not be removed by the split in the case of the first section
@@ -137,7 +126,7 @@ tiddlycut.modules.tClip = (function () {
 
 						
 			}	
-
+		pref.addTags();
 		}else {
 			defaultCategories();
 			//alert("config tiddler not found");
@@ -153,11 +142,7 @@ tiddlycut.modules.tClip = (function () {
 		} 
 	}
 
-    function setClipConfig(Config){
-			self.ClipConfig = Config;
-			tiddlycut.log("setclipconfig ",self.ClipConfig);
 
-	}
 	
 	function getFileStuff() {
         //BJ FIXME - remove redundent
