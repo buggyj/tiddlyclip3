@@ -12,9 +12,7 @@ var test;
 // Restores select box and text fields
 function restore_options() {
 		
-  chrome.storage.local.get({
-	nag: true
-  }, function(items) {
+  chrome.storage.local.get({nodups: true}, function(items) {
     document.getElementById("nodups").checked = items.nodups;
   });
 }

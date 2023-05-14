@@ -29,37 +29,37 @@ tiddlycut.modules.tcBrowser= (function () {
 		thechrome=doc;
 		tiddlycut.log("browerstartup");
 		
-	const offscreenDocumentPath ="content/background.html";
+		const offscreenDocumentPath ="content/background.html";
 
 
-	(async function (path) {
-	  // Check all windows controlled by the service worker to see if one 
-	  // of them is the offscreen document with the given path
-	  const matchedClients = await clients.matchAll();
-	  for (const client of matchedClients) {
-		if (client.url === path) {
-		  return true;
-		}
-	  }
-		  await chrome.offscreen.createDocument({
-		  url: path,
-		  reasons: ['CLIPBOARD'],
-		  justification: 'testing'
-		}).then(()=>{		
-			chrome.contextMenus.removeAll(function() {
-			
-				chrome.contextMenus.create({
-						"id":"dock",
-						"title" : "dock here",
-						"contexts":["all"]
-					}
-				);
-			});
-			chrome.storage.local.set({'tags': {},'flags': {},'docklist':[]}, function() {tiddlycut.log("bg: reset tags etc")});
-		}).catch(error => console.log(error));
-	})(offscreenDocumentPath);
+		(async function (path) {
+			// Check all windows controlled by the service worker to see if one 
+			// of them is the offscreen document with the given path
+			const matchedClients = await clients.matchAll();
+			for (const client of matchedClients) {
+				if (client.url === path) {
+				  return true;
+				}
+			}
+			await chrome.offscreen.createDocument({
+			  url: path,
+			  reasons: ['CLIPBOARD'],
+			  justification: 'testing'
+			}).then(()=>{		
+				chrome.contextMenus.removeAll(function() {
+				
+					chrome.contextMenus.create({
+							"id":"dock",
+							"title" : "dock here",
+							"contexts":["all"]
+						}
+					);
+				});
+				chrome.storage.local.set({'tags': {},'flags': {},'docklist':[]}, function() {tiddlycut.log("bg: reset tags etc")});
+			}).catch(error => console.log(error));
+		})(offscreenDocumentPath);
 
-}
+	}
 	
 	function winWrapper (where) {
 		return thechrome; //BJ FIXME not sure if this is correct		

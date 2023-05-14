@@ -5,37 +5,70 @@ if (!tiddlycut.modules)
 	
 tiddlycut.log=console.log;	
 
+var nn = 0;
+function rdock(tw) {
+	tiddlycut.log("redocking");
+	tiddlycut.log(tw);
+    tiddlycut.modules.browserOverlay.reDockRegister(tw.id, tw.url, tw.config, tw.title, tw.opts );//redock true
 
-function rdock(info, tab) {
-	tiddlycut.log("docking after tab closed");
-	chrome.tabs.sendMessage(tab, 
-	{
-		action : 'actiondock', data:{opttid:pref.Get("ConfigOptsTiddler")}
-	}, function (source){}
-	);
+};//end rdock
+    
+function checkduplicate(tabs, tabId, url, active){
+	if (!url) {console.log(tabId," has no url ", active);
+		return;
+	}
+	for(let tab of tabs){ 
+		if(url == tab.url && tab.id != tabId) {
+			chrome.windows.update(tab.windowId, {focused:true});
+			chrome.tabs.update(tab.id,{active:true});
+			chrome.tabs.remove(tabId);
+		}
+	}
+}	
+function tabclose(tabId,changeInfo) {changedtab(tabId,changeInfo,"close")}
+function tabchange(tabId,changeInfo) {
+	//if (!!changeInfo.status && changeInfo.status == 'complete')
+		changedtab(tabId,changeInfo,"changing");
+}
 
-};//end dock
-	
-function changedtab (tabId,changeInfo) {
+function changedtab (tabId,changeInfo,typeOrginal) {
+	var type=typeOrginal||"other",found=false;
+	console.log ("nn ",++nn);
+	tiddlycut.log("**tabchanged**"+tabId+JSON.stringify(changeInfo)+" type: ",type);
 	chrome.storage.local.get("docklist", function(items){
 
 		var docklist = items.docklist;
 		var n = docklist.length;
-		if (n == 0) return;
-		//is focused tw closing? 
-		if (tabId == docklist[0].id) {//delete and maybe redock 
-			docklist.shift();
-			chrome.storage.local.set({'docklist': docklist}, function() {
+		
+		docklistnew = docklist.filter(tw => tw.id != tabId);
+			if (n !== docklistnew.length) found = true;
+			
+		if (!found){
+			chrome.storage.local.get({nodups:false}, function(items){
+				//if (false==items.nodups) return;
+				//chrome.tabs.get(tabId, function (info) {
+					chrome.tabs.query({
+						
+					},function(tabs)  {
+						checkduplicate(tabs, tabId, changeInfo.url, typeOrginal.active);
+					});
+				//});
+				return;
+			});
+			return;
+		}
+		if (tabId == docklist[0].id) {//remove head of list
+			chrome.storage.local.set({'docklist': docklistnew}, function() {
 				if (n > 1) {
 					
 					console.log ("remove from docked redock next", docklist[0].id );
-					chrome.contextMenus.removeAll(function() {
-						rdock({},docklist[0].id ); //not emptied list
-					});
+
+						rdock(docklistnew[0]); //not emptied list
+
 				}
 				else {
 					console.log ("removed list item from menu");
-					chrome.contextMenus.removeAll(function() {		
+					chrome.contextMenus.removeAll(function() {	console.log("callback  removed list item")	
 						chrome.contextMenus.create({
 								"id":"dock",
 								"title" : "dock here",
@@ -45,18 +78,17 @@ function changedtab (tabId,changeInfo) {
 				}
 			});
 		} else {
-			docklist = docklist.filter(tw => tw.id != tabId);
-			if (n !== docklist.length) chrome.storage.local.set({'docklist': docklist}, function() {
+			chrome.storage.local.set({'docklist': docklistnew}, function() {
 				console.log ("remove from docked submenu", tabId);
 				chrome.contextMenus.remove(tabId.toString());
-			});
+			});	
 		}
 	});
 
 	tiddlycut.log(tabId, "tab has closed or reloaded")
 };
-chrome.tabs.onRemoved.addListener(changedtab);
-chrome.tabs.onUpdated.addListener(changedtab);
+chrome.tabs.onRemoved.addListener(tabclose);
+chrome.tabs.onUpdated.addListener(tabchange);
 
 tiddlycut.id = null;
 	
@@ -95,7 +127,9 @@ tiddlycut.modules.browserOverlay = (function ()
 	var adaptions = {};
 	var api = 
 	{
-		onLoad:onLoad, adaptions:adaptions, pushData:pushData
+		onLoad:onLoad, adaptions:adaptions, 
+		pushData:pushData,dockRegister:dockRegister,
+		reDockRegister:reDockRegister
 	}
 	var currentsection=0;
 		
@@ -121,18 +155,18 @@ tiddlycut.modules.browserOverlay = (function ()
 				return;
 			}
 			if (info.menuItemId == "dock") {
-				chrome.contextMenus.removeAll(function() {	
 					dock(info, tab.id);
-				});
 				return;
 			}
 
 			if (info.parentMenuItemId == "isDocked") {
 				//removal is a hack as the response to redocking (probably intertab messaging is slow)
 				//BJ - redo menus to remain but hidden, unhide on reselection instead of redock?
-				chrome.contextMenus.removeAll(function() {	
-					dock(info, 1*info.menuItemId);
-				});
+
+					chrome.storage.local.get("docklist", function(items){ 
+						rdock(items.docklist.filter(tw => tw.id == info.menuItemId)[0]);
+					});
+
 				return;
 			}
 			//BJ guru meditaion - maybe use chrome.storage.session for these values? - not sure it works in ff??
@@ -198,7 +232,7 @@ tiddlycut.modules.browserOverlay = (function ()
 	chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
 		tiddlycut.log("tiddlyclipbg: got request: "+msg.action);
 		if (msg.action == "dock") {
-			dockRegister(sender.tab.id, msg.url, msg.txt, msg.extra, msg.aux, true );//redock true
+			dockRegister(sender.tab.id, msg.url, msg.txt, msg.extra, msg.aux, true );
 			tiddlycut.log ("got dock")
 		}
 		else if (msg.action == "notify") {
@@ -229,16 +263,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			return;
 		}
 	});
-    
-    function checkduplicate(tabs, tabId, url, active){
-        for(let tab of tabs){
-            if(url == tab.url && tab.id != tabId){
-                chrome.windows.update(tab.windowId, {focused:true});
-                chrome.tabs.update(tab.id,{active:active});
-                chrome.tabs.remove(tabId);
-            }
-        }
-    }
+
 	
 	function sendsysmsg  (tab, section, cat, data) {
 		var sdata = {data:data};
@@ -247,57 +272,60 @@ tiddlycut.modules.browserOverlay = (function ()
 	}
 	
 	
-	function changeFileNew(config, id, url) {
+	function changeFileNew(config, id, url,opts) {
 		
 		tiddlycut.id = id;
 
 		//tClip.setClipConfig(config);
-
-		chrome.contextMenus.create(
-			{
+		chrome.contextMenus.removeAll(function() {
+			chrome.contextMenus.create({
 				"id":"dock",
 				"title" : "dock here:",
 				"contexts":["all"]
-			}
-		);
-		var shorturl = url;
+			});
+		
+			var shorturl = url;
 				if (shorturl.substr(shorturl.length-1) =='/') shorturl = shorturl.substr(0,shorturl.length-1);
 				var startPos = shorturl.lastIndexOf("/")+1;
 				if ((shorturl.length - startPos)> 4) shorturl =shorturl.substr(startPos);
-		chrome.contextMenus.create(
-			{
+			chrome.contextMenus.create({
 				"id":"isDocked",
 				"title" : shorturl,
 				"contexts":["all"]
-			}
-		);
-		//modify list of docked tws
-		chrome.storage.local.get("docklist", function(items){
-			var docklist = items.docklist, isListed = false;
-			var newTW = {id:id, title:url};
-			var docklist = [newTW, ...items.docklist.filter(tw => tw.id != id.toString())];
+			});
+			//modify list of docked tws
+			chrome.storage.local.get("docklist", function(items){
+				var docklist = items.docklist, isListed = false;
+				var newTW = {id:id, url:url, title:url, config:config, opts:opts};
+				var docklist = [newTW, ...items.docklist.filter(tw => tw.id != id.toString())];
 
-			for (var i = 1; i < docklist.length; i++) {
-				
-				var fileLoc = docklist[i].title;
-				if (fileLoc.substr(fileLoc.length-1) =='/') fileLoc = fileLoc.substr(0,fileLoc.length-1);
-				var startPos = fileLoc.lastIndexOf("/")+1;
-				if ((fileLoc.length - startPos)> 4) fileLoc =fileLoc.substr(startPos);
-				
-				chrome.contextMenus.create({
-					"id":docklist[i].id.toString(),
-					"parentId":"isDocked",
-					"title" : fileLoc,
-					"contexts":["all"]
-				});
-			}
-			chrome.storage.local.set({'docklist': docklist}, function() {});
-		
-			tClip.loadSectionFromFile(id, config); 
+				for (var i = 1; i < docklist.length; i++) {
+					
+					var fileLoc = docklist[i].title;
+					if (fileLoc.substr(fileLoc.length-1) =='/') fileLoc = fileLoc.substr(0,fileLoc.length-1);
+					var startPos = fileLoc.lastIndexOf("/")+1;
+					if ((fileLoc.length - startPos)> 4) fileLoc =fileLoc.substr(startPos);
+					
+					chrome.contextMenus.create({
+						"id":docklist[i].id.toString(),
+						"parentId":"isDocked",
+						"title" : fileLoc,
+						"contexts":["all"]
+					});
+				}
+				chrome.storage.local.set({'docklist': docklist}, function() {});
+			
+				tClip.loadSectionFromFile(id, config); 
+			});
 		});
 	}
 
+	function reDockRegister(id, url, config, title, opts, redock) {
 
+		pref.loadOpts(opts);
+	    changeFileNew(config, id, url, opts);	    
+
+	};
 
 	function dockRegister(id, url, config, title, optid, redock) {
 		//ignore duplicate docks
@@ -316,7 +344,7 @@ tiddlycut.modules.browserOverlay = (function ()
 		}
 		pref.loadOpts(opts);
 
-	    changeFileNew(configtid.body, id, url);	    
+	    changeFileNew(configtid.body, id, url, opts);	    
 
 	};
 	function injectMessageBox(doc) {
