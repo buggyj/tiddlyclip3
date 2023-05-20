@@ -53,7 +53,7 @@ tiddlycut.modules.tClip = (function () {
 	function setSubMenu(cat,catname,sectionName,id)  {
 			chrome.contextMenus.create(
 				{
-					"id":catname+"::"+cat.modes.join("::"),
+					"id":catname+"::"+cat.modes.join("::")+"::-"+Math.random().toString(),//hack to make sure all ids are unique
 					"title" : catname,
 					parentId: id+"::"+sectionName,
 					"contexts":["all"]

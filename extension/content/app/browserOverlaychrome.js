@@ -272,7 +272,7 @@ tiddlycut.modules.browserOverlay = (function ()
 	}
 	
 	
-	function changeFileNew(config, id, url,opts) {
+	function changeFileNew(config, id, url,opts,title) {
 		
 		tiddlycut.id = id;
 
@@ -288,15 +288,23 @@ tiddlycut.modules.browserOverlay = (function ()
 				if (shorturl.substr(shorturl.length-1) =='/') shorturl = shorturl.substr(0,shorturl.length-1);
 				var startPos = shorturl.lastIndexOf("/")+1;
 				if ((shorturl.length - startPos)> 4) shorturl =shorturl.substr(startPos);
+				if (pref.Get("menuShowTitle") == "true") { 
+					shorturl =  title;
+				} 
 			chrome.contextMenus.create({
 				"id":"isDocked",
-				"title" : shorturl,
+				"title" : "📂 " + shorturl ,
 				"contexts":["all"]
 			});
 			//modify list of docked tws
 			chrome.storage.local.get("docklist", function(items){
-				var docklist = items.docklist, isListed = false;
-				var newTW = {id:id, url:url, title:url, config:config, opts:opts};
+				var docklist = items.docklist, isListed = false, fileLoc;
+				if (pref.Get("menuShowTitle") == "true") { 
+					fileLoc =  title;
+				} else {
+					fileLoc  = url;
+				} 
+				var newTW = {id:id, url:url, title:fileLoc, config:config, opts:opts};
 				var docklist = [newTW, ...items.docklist.filter(tw => tw.id != id.toString())];
 
 				for (var i = 1; i < docklist.length; i++) {
@@ -323,7 +331,7 @@ tiddlycut.modules.browserOverlay = (function ()
 	function reDockRegister(id, url, config, title, opts, redock) {
 
 		pref.loadOpts(opts);
-	    changeFileNew(config, id, url, opts);	    
+	    changeFileNew(config, id, url, opts, title);	    
 
 	};
 
@@ -344,7 +352,7 @@ tiddlycut.modules.browserOverlay = (function ()
 		}
 		pref.loadOpts(opts);
 
-	    changeFileNew(configtid.body, id, url, opts);	    
+	    changeFileNew(configtid.body, id, url, opts, title);	    
 
 	};
 	function injectMessageBox(doc) {
