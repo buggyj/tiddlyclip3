@@ -174,7 +174,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			idAndSection = info.parentMenuItemId.split("::");
 			
 			var cat=catAndModes.shift();
-		 	pushData(cat ,info, tab, idAndSection[0], idAndSection[1], catAndModes ); 
+		 	pushData(cat ,info, tab, idAndSection[0], idAndSection[1], catAndModes , idAndSection[2]); 
 		} 
 
 		function dock(info, tab) {
@@ -393,7 +393,7 @@ tiddlycut.modules.browserOverlay = (function ()
 		});	
 	}
 	
-	function pushData(category, info, tab, id, section, modes) 
+	function pushData(category, info, tab, id, section, modes, sectionN) 
 	{
 		var promptindex;
 		tiddlycut.log(modes);
@@ -475,11 +475,11 @@ tiddlycut.modules.browserOverlay = (function ()
 											if (hasMode(modes,"note") ) {
 												chrome.storage.local.get("notepad", function(items){
 													tcBrowser.setNote(items.notepad);
-													GoChrome(currentCat, null, tab.id, id, section, modes);
+													GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
 													chrome.storage.local.set({'notepad': ""}, function() {tiddlycut.log("bg: rm note")});
 												});
 											} else {
-												GoChrome(currentCat, null, tab.id, id, section, modes);
+												GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
 											}
 											chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
 												chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
@@ -516,11 +516,11 @@ tiddlycut.modules.browserOverlay = (function ()
 							if (hasMode(modes,"note") ) {
 								chrome.storage.local.get("notepad", function(items){
 									tcBrowser.setNote(items.notepad);
-									GoChrome(currentCat, null, tab.id, id, section, modes);
+									GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
 									chrome.storage.local.set({'notepad': null}, function() {tiddlycut.log("bg: rm note")});							
 								});
 							} else {
-								GoChrome(currentCat, null, tab.id, id, section, modes);
+								GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
 							}
 							chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
 								chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
@@ -542,17 +542,17 @@ tiddlycut.modules.browserOverlay = (function ()
 					if (hasMode(modes,"note") ) {
 						chrome.storage.local.get("notepad", function(items){
 							tcBrowser.setNote(items.notepad);
-							GoChrome(currentCat, source.tids, tab.id, id, section, modes);
+							GoChrome(currentCat, source.tids, tab.id, id, section, modes, sectionN);
 							chrome.storage.local.set({'notepad': null}, function() {tiddlycut.log("bg: rm note")});
 						});
 					} else {
-						GoChrome(currentCat, source.tids, tab.id, id, section, modes);
+						GoChrome(currentCat, source.tids, tab.id, id, section, modes, sectionN);
 					}
 				}
 			);
 	}
 	
-	function GoChrome(category, tidlist, sourcetab, id, section, modes)
+	function GoChrome(category, tidlist, sourcetab, id, section, modes, currentsection)
 	{
 		tiddlycut.log("go1");
 		if (false == pageData.SetupVars(category,section,modes)) return; //sets mode - determines what is copied

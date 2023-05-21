@@ -22,11 +22,11 @@ tiddlycut.modules.tClip = (function () {
 
 	var sectionNames=[];
     
-	function loadActiveSectionCategories(table, sectionName,id) {
+	function loadActiveSectionCategories(table, sectionName,id,sectionN) {
 		var categoryRows = table.split("\n");
 		var cat = {};
 		var pieces;
-		setMenu(sectionName,id);
+		setMenu(sectionName,id,sectionN);
 		for (var i=0; i<categoryRows.length; i++) {
 			cat = {rules:null,valid:true};
 			pieces = categoryRows[i].split("|");// form |Category|Tip|Tags|Rules Tid|Modes|
@@ -44,27 +44,27 @@ tiddlycut.modules.tClip = (function () {
 			if (hasModeBegining(cat,"debug")) {
 				debugcontrol(cat);
 			} else {
-				setSubMenu(cat,catName,sectionName,id);	
+				setSubMenu(cat,catName,sectionName,id,sectionN);	
 			}
 			
 		} 
 		return;
 	}
-	function setSubMenu(cat,catname,sectionName,id)  {
+	function setSubMenu(cat,catname,sectionName,id,sectionN)  {
 			chrome.contextMenus.create(
 				{
 					"id":catname+"::"+cat.modes.join("::")+"::-"+Math.random().toString(),//hack to make sure all ids are unique
 					"title" : catname,
-					parentId: id+"::"+sectionName,
+					parentId: id+"::"+sectionName+"::"+sectionN,
 					"contexts":["all"]
 				}
 			);
 	}
 	
-	function setMenu(sectionName,id)  {
+	function setMenu(sectionName,id,sectionN)  {
 			chrome.contextMenus.create(
 				{
-					"id":id+"::"+sectionName,
+					"id":id+"::"+sectionName+"::"+sectionN,
 					"title" : sectionName,
 					"contexts":["all"]
 				}
@@ -121,7 +121,7 @@ tiddlycut.modules.tClip = (function () {
 
 					// assumes that '|' means there is a def table otherwise move to next sections def table
 					//only load active categories
-					loadActiveSectionCategories(sectionStrgs[j].replace(/(^\|)*\n/,''),sectionNames[j],id);//strip of section name from first line
+					loadActiveSectionCategories(sectionStrgs[j].replace(/(^\|)*\n/,''),sectionNames[j],id,j);//strip of section name from first line
 
 
 						
