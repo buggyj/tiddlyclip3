@@ -174,7 +174,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			idAndSection = info.parentMenuItemId.split("::");
 			
 			var cat=catAndModes.shift();
-		 	pushData(cat ,info, tab, idAndSection[0], idAndSection[1], catAndModes , idAndSection[2]); 
+		 	pushData(cat ,info, tab, idAndSection[0], idAndSection[1], catAndModes, idAndSection[2] ); 
 		} 
 
 		function dock(info, tab) {
@@ -459,33 +459,35 @@ tiddlycut.modules.browserOverlay = (function ()
 						{
 							action : 'cut', prompt:(promptindex?pref.Get(promptindex):null)
 						}, function (source)
-						{ 
+						{   
+	
 							tcBrowser.setFromClipboard(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
 								var coords  = source.coords||{x0:null,y0:null,wdt:null,ht:null};
 								for (var i = 0; i < results.length; i++) tcBrowser[results[i].fn](results[i].val);
-								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later
-								
+								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later		
 								
 								tcBrowser.snap(size,tab.id, coords.x0, coords.y0, coords.wdt, coords.ht, function (dataURL) { 
-									chrome.tabs.sendMessage(tab.id, {action : 'restorescreen'}, 
-									function (source) { 
-										tcBrowser.setSnapImage(dataURL);
-										chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
-											tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);
-											if (hasMode(modes,"note") ) {
-												chrome.storage.local.get("notepad", function(items){
-													tcBrowser.setNote(items.notepad);
+									chrome.tabs.sendMessage(tab.id, {action : 'restorescreen'}, function (source) { 
+										tcBrowser.setSelectedHtml(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
+											for (var i = 0; i < results.length; i++) tcBrowser[results[i].fn](results[i].val);									
+											tcBrowser.setSnapImage(dataURL);
+											chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
+												tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);
+												if (hasMode(modes,"note") ) {
+													chrome.storage.local.get("notepad", function(items){
+														tcBrowser.setNote(items.notepad);
+														GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
+														chrome.storage.local.set({'notepad': ""}, function() {tiddlycut.log("bg: rm note")});
+													});
+												} else {
 													GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
-													chrome.storage.local.set({'notepad': ""}, function() {tiddlycut.log("bg: rm note")});
+												}
+												chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
+													chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
 												});
-											} else {
-												GoChrome(currentCat, null, tab.id, id, section, modes, sectionN);
-											}
-											chrome.storage.local.get({resettags:{},resetflags:{}}, function(items){
-												chrome.storage.local.set({'tags': items.resettags,'flags': items.resetflags, cptext:null}, function() {tiddlycut.log("bg: reset tags etc")});
 											});
 										});
-									});
+									});									
 								});
 							})
 						}
@@ -501,7 +503,7 @@ tiddlycut.modules.browserOverlay = (function ()
 			}	
 			bjSendMessage(tab.id,
 				{
-					action : 'cut',prompt:(promptindex?pref.Get(promptindex):null)
+					action : 'getSelection',prompt:(promptindex?pref.Get(promptindex):null)
 				}, function (source)
 				{ 
 					tiddlycut.log ("currentCat",currentCat,"tab.id",tab.id);

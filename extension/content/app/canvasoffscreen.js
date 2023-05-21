@@ -18,7 +18,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	
 	//sendResponse(request.image);
     return true;
-  } else   if (request.action == 'ClipBoardRead') { 
+  } else   if (request.action == 'html') { 
+	//try {
+			var pasteText ;
+			var results = [], waitImage = false;
+			results.push({fn:"setHtml", val:DOMPurify.sanitize(request.html)});
+			sendResponse(results);
+		return true;
+  }
+  else   if (request.action == 'ClipBoardRead') { 
 	//try {
 			var pasteText ;
 			var results = [], waitImage = false;
@@ -71,6 +79,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		//} catch (e) {console.log(e);}
 		return true;
   }
-  
 
 }); 

@@ -16,7 +16,8 @@ tiddlycut.modules.tcBrowser= (function () {
 		getNote:getNote,					setNote:setNote,					getExtraTags:getExtraTags,
 		setExtraTags:setExtraTags,			getExtraFlags:getExtraFlags,		setClipboardString:setClipboardString,
 		getcptext:getcptext,				setCBImage:setCBImage,				getCBImage:getCBImage,
-		setClipboardHtml:setClipboardHtml,	getClipboardHtml:getClipboardHtml,  setFromClipboard:setFromClipboard
+		setClipboardHtml:setClipboardHtml,	getClipboardHtml:getClipboardHtml,  setFromClipboard:setFromClipboard,
+		setSelectedHtml:setSelectedHtml
 	}
 
     var convert;
@@ -104,7 +105,14 @@ tiddlycut.modules.tcBrowser= (function () {
 	}	
 		
 
+	
+	 async function setSelectedHtml(html, callback) {
+		var results = [];
 		
+		setClipboardHtml("");	
+		results =   chrome.runtime.sendMessage({action: "html", html:html}, callback);	
+		
+	}		
 		
 
 
