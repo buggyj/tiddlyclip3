@@ -1,5 +1,5 @@
 # tiddlyclip3 is [tiddlyclip](https://github.com/buggyj/tiddlyclip) reconstructed for the new chrome V3 extension interface.
-note that this is a pre-release and has not been full tested - use at your own risk!
+## note that this is a pre-release and has not been full tested - use at your own risk!
 
 Getting started (chrome)
 
