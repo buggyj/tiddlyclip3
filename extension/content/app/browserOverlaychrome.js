@@ -464,7 +464,7 @@ tiddlycut.modules.browserOverlay = (function ()
 							tcBrowser.setFromClipboard(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
 								var coords  = source.coords||{x0:null,y0:null,wdt:null,ht:null};
 								for (var i = 0; i < results.length; i++) tcBrowser[results[i].fn](results[i].val);
-								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.coords); //add data to tcbrowser object -retrived later		
+								tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.description, source.mediaImage); //add data to tcbrowser object -retrived later		
 								
 								tcBrowser.snap(size,tab.id, coords.x0, coords.y0, coords.wdt, coords.ht, function (dataURL) { 
 									chrome.tabs.sendMessage(tab.id, {action : 'restorescreen'}, function (source) { 
@@ -511,7 +511,7 @@ tiddlycut.modules.browserOverlay = (function ()
 
 					tcBrowser.setFromClipboard(source.html, function (results) {//BJ add check for 'dirty mode' and pass in a switch so that sanitization is ignored
 						for (var i = 0; i < results.length; i++){ tcBrowser[results[i].fn](results[i].val)};
-						tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response); //add data to tcbrowser object -retrived later			
+						tcBrowser.setDatafromCS( source.url, source.title, source.twc, source.tw5, source.response, source.description, source.mediaImage); //add data to tcbrowser object -retrived later			
 
 						chrome.storage.local.get({tags:{},flags:{},cptext:''}, function(items){
 							tcBrowser.setExtraTags(items.tags,items.flags,items.cptext);				     
@@ -539,7 +539,7 @@ tiddlycut.modules.browserOverlay = (function ()
 					action : 'cutTid', prompt:(promptindex?pref.Get(promptindex):null)
 				}, function (source)
 				{
-					tcBrowser.setDatafromCS( source.url, null, source.title, source.twc, source.tw5,source.response); //add data to tcbrowser object -retrived later
+					tcBrowser.setDatafromCS( source.url, null, source.title, source.twc, source.tw5,source.response, source.description, source.mediaImage); //add data to tcbrowser object -retrived later
 					tiddlycut.log ("cuttid reply tids",source.tids);
 					if (hasMode(modes,"note") ) {
 						chrome.storage.local.get("notepad", function(items){
