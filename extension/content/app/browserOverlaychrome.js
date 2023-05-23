@@ -92,35 +92,7 @@ chrome.tabs.onUpdated.addListener(tabchange);
 
 tiddlycut.id = null;
 	
-console.log ("starting");	
-chrome.runtime.onInstalled.addListener(function(details){console.log ("oninstall "+details.reason)
-    if(details.reason == "install" ||details.reason == "update"){ 
-  chrome.windows.getAll({'populate': true}, function(windows) {
-    for (var i = 0; i < windows.length; i++) {
-      var tabs = windows[i].tabs;
-      for (var j = 0; j < tabs.length; j++) {
-            tiddlycut.log ("loadcs "+j);
-            var urlparts = tabs[j].url.split('://');
-            if (urlparts.length > 1 && urlparts[0] === "chrome") break;
-            try { 
-                chrome.scripting.executeScript(
-                    { 
-					target: {tabId: tabs[j].id, allFrames: false},
-					files: ['content/util/logsimple.js']
-					});
-                chrome.scripting.executeScript(
-					{ 
-					target: {tabId: tabs[j].id, allFrames: false},
-					files: ['content/contentScript.js']
-					});
-            }
-            catch (err) {console.log ("cs refused at url "+tabs[j].url)};
-        }
-    }
-  });
- }});
-
-
+tiddlycut.log ("starting");	
 
 tiddlycut.modules.browserOverlay = (function ()
 {
