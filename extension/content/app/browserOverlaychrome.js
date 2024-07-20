@@ -5,7 +5,7 @@ if (!tiddlycut.modules)
 	
 tiddlycut.log=console.log;	
 
-var nn = 0;
+//var nn = 0;
 function rdock(tw) {
 	tiddlycut.log("redocking");
 	tiddlycut.log(tw);
@@ -25,18 +25,18 @@ function checkduplicate(tabs, tabId, url, active){
 		}
 	}
 }	
-function tabclose(tabId,changeInfo) {changedtab(tabId,changeInfo,"close")}
+function tabclose(tabId,changeInfo) {changedtab(tabId,changeInfo,"close")}//,++nn)}
 function tabchange(tabId,changeInfo) {
-	//if (!!changeInfo.status && changeInfo.status == 'complete')
-		changedtab(tabId,changeInfo,"changing");
+	if (changeInfo.status)
+		changedtab(tabId,changeInfo,"changing");//,++nn);
 }
 
-function changedtab (tabId,changeInfo,typeOrginal) {
+function changedtab (tabId,changeInfo,typeOrginal){//,localnn) {
 	var type=typeOrginal||"other",found=false;
-	console.log ("nn ",++nn);
+	//console.log ("nn stage 1",nn, localnn);
 	tiddlycut.log("**tabchanged**"+tabId+JSON.stringify(changeInfo)+" type: ",type);
 	chrome.storage.local.get("docklist", function(items){
-
+	//console.log ("nn conlision (if not equal)",nn, localnn);
 		var docklist = items.docklist;
 		var n = docklist.length;
 		
@@ -45,7 +45,8 @@ function changedtab (tabId,changeInfo,typeOrginal) {
 			
 		if (!found){
 			chrome.storage.local.get({nodups:false}, function(items){
-				//if (false==items.nodups) return;
+				console.log("nodups", items.nodups);
+				if (false==items.nodups) return;
 				//chrome.tabs.get(tabId, function (info) {
 					chrome.tabs.query({
 						
@@ -80,7 +81,13 @@ function changedtab (tabId,changeInfo,typeOrginal) {
 		} else {
 			chrome.storage.local.set({'docklist': docklistnew}, function() {
 				console.log ("remove from docked submenu", tabId);
-				chrome.contextMenus.remove(tabId.toString());
+				chrome.contextMenus.remove(tabId.toString()
+				//,
+				//	() => {
+				//		const lastError = chrome.runtime.lastError;
+				//		if (lastError && lastError.message)
+				//				console.log ("remove from docked submenu ",lastError.message, tabId);}//ignore duplicate removal
+				);
 			});	
 		}
 	});

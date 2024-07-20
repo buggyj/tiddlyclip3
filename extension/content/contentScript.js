@@ -520,6 +520,7 @@ return {Coords:Coords, On:On, xhairsOff:xhairsOff, Remove:Remove,restorescreen:r
 				tiddlycut.log ("got show" + msg.action );
 				//event.currentTarget.parentNode.removeChild(message);
 				// Save the file
+				if (msg.action.substring(0,2) === "__") return true;
 				message.parentNode.removeChild(message);
 				if (msg.action in callbacks) {callbacks[msg.action](msg);return false;}
 				chrome.runtime.sendMessage(msg,function() {});
